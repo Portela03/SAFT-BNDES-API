@@ -1,0 +1,37 @@
+server:
+  port: ${APP_PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:55432/saftbndes}
+    username: ${DATABASE_USER:saft}
+    password: ${DATABASE_PASSWORD:saft}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+bndes:
+  ckan:
+    base-url: ${CKAN_BASE_URL:https://dadosabertos.bndes.gov.br}
+    resource-id: ${CKAN_RESOURCE_ID:6f56b78c-510f-44b6-8274-78a5b7e931f4}
+    api-token: ${CKAN_API_TOKEN:}
+  csv:
+    encoding: ${CSV_ENCODING:windows-1252}
+    delimiter: ${CSV_DELIMITER:;}
+    decimal: ${CSV_DECIMAL:,}
+    date-format: ${CSV_DATE_FORMAT:yyyy-MM-dd'T'HH:mm:ss}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ORIGINS:*}
