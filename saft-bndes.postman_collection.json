@@ -1,0 +1,249 @@
+{
+  "info": {
+    "name": "SAFT-BNDES API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "operacaoId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 List operacoes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/operacoes?size=5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Create operacao",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Empresa Teste\",\n  \"cnpj\": \"12345678000199\",\n  \"uf\": \"SP\",\n  \"dataDaContratacao\": \"2024-01-15\",\n  \"valorContratadoReais\": 100000.00,\n  \"valorDesembolsadoReais\": 25000.00,\n  \"setorBndes\": \"INDUSTRIA\",\n  \"subsetorBndes\": \"ALIMENTOS\",\n  \"numeroDoContrato\": 123456,\n  \"porteDoCliente\": \"MEDIA\",\n  \"situacaoDoContrato\": \"ATIVO\",\n  \"naturezaDoCliente\": \"PRIVADO\",\n  \"formaDeApoio\": \"DIRETO\",\n  \"produto\": \"FINAME\",\n  \"instrumentoFinanceiro\": \"BNDES FINAME\",\n  \"inovacao\": \"NAO\"\n}"
+        },
+        "url": "{{baseUrl}}/operacoes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.collectionVariables.set('operacaoId', data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Get operacao by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/operacoes/{{operacaoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Update operacao",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Empresa Teste Atualizada\",\n  \"cnpj\": \"12345678000199\",\n  \"uf\": \"SP\",\n  \"dataDaContratacao\": \"2024-01-15\",\n  \"valorContratadoReais\": 120000.00,\n  \"valorDesembolsadoReais\": 30000.00,\n  \"setorBndes\": \"INDUSTRIA\",\n  \"subsetorBndes\": \"ALIMENTOS\",\n  \"numeroDoContrato\": 123456,\n  \"porteDoCliente\": \"MEDIA\",\n  \"situacaoDoContrato\": \"ATIVO\",\n  \"naturezaDoCliente\": \"PRIVADO\",\n  \"formaDeApoio\": \"DIRETO\",\n  \"produto\": \"FINAME\",\n  \"instrumentoFinanceiro\": \"BNDES FINAME\",\n  \"inovacao\": \"NAO\"\n}"
+        },
+        "url": "{{baseUrl}}/operacoes/{{operacaoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 List operacoes (filters)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/operacoes?uf=SP&setor=INDUSTRIA&valorMin=1000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Insights total por uf",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/insights/total-por-uf"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Insights top setores",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/insights/top-setores?limit=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Delete operacao",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/operacoes/{{operacaoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 204', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Get operacao after delete",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/operacoes/{{operacaoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Import CKAN (optional - enable only if needed)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/carga"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "disabled": true
+    }
+  ]
+}
