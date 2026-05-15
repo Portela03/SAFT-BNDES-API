@@ -353,6 +353,18 @@ O sistema baixa o arquivo direto do portal BNDES via API CKAN.
 
 ---
 
+## URLs de Produção
+
+| Ambiente | URL |
+|---|---|
+| **Frontend (Vercel)** | [https://saft-bndes.vercel.app](https://saft-bndes.vercel.app/) |
+| **Backend (Render)** | [https://saft-bndes-api.onrender.com](https://saft-bndes-api.onrender.com) |
+| **Swagger (produção)** | [https://saft-bndes-api.onrender.com/swagger-ui.html](https://saft-bndes-api.onrender.com/swagger-ui.html) |
+
+> **Atenção:** A URL do backend pode mudar caso o plano gratuito do Render expire.
+
+---
+
 ## Guia de Execução
 
 ### Pré-requisitos
