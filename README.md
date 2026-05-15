@@ -407,6 +407,45 @@ SELECT id, cliente, uf, setor_bndes, valor_contratado_reais FROM operacoes_bndes
 
 ---
 
+## Testando com o Postman
+
+O arquivo `saft-bndes.postman_collection.json` na raiz do projeto contém uma coleção pronta com todos os endpoints.
+
+### Como importar
+
+1. Abra o **Postman**
+2. Clique em **Import** (botão no canto superior esquerdo)
+3. Selecione o arquivo `saft-bndes.postman_collection.json`
+4. Clique em **Import**
+
+### Variáveis da coleção
+
+| Variável | Valor padrão | Descrição |
+|---|---|---|
+| `baseUrl` | `http://localhost:8080` | URL base da API. Altere para `https://saft-bndes-api.onrender.com` para testar em produção |
+| `operacaoId` | *(preenchido automaticamente)* | ID da operação criada no passo 02; usado nos passos 03, 04, 08 e 09 |
+
+> Para usar contra o ambiente de produção, edite a variável `baseUrl` na coleção: clique no nome da coleção → **Variables** → altere o valor de `baseUrl`.
+
+### Fluxo de testes incluído
+
+| # | Nome | Método | Rota | O que valida |
+|---|---|---|---|---|
+| 01 | List operacoes | GET | `/operacoes?size=5` | Status 200 |
+| 02 | Create operacao | POST | `/operacoes` | Status 201 · salva `operacaoId` automaticamente |
+| 03 | Get operacao by id | GET | `/operacoes/{{operacaoId}}` | Status 200 |
+| 04 | Update operacao | PUT | `/operacoes/{{operacaoId}}` | Status 200 |
+| 05 | List operacoes (filters) | GET | `/operacoes?uf=SP&setor=INDUSTRIA&valorMin=1000` | Status 200 |
+| 06 | Insights total por uf | GET | `/insights/total-por-uf` | Status 200 |
+| 07 | Insights top setores | GET | `/insights/top-setores?limit=3` | Status 200 |
+| 08 | Delete operacao | DELETE | `/operacoes/{{operacaoId}}` | Status 204 |
+| 09 | Get operacao after delete | GET | `/operacoes/{{operacaoId}}` | Status 404 |
+| 10 | Import CKAN *(desativado)* | POST | `/carga` | Status 200 · habilitar só se necessário |
+
+Execute os requests **na ordem** (01 → 09) para que `operacaoId` seja propagado corretamente entre os passos.
+
+---
+
 ## Dicionário de Dados
 
 | Campo | Descrição | Exemplo |
