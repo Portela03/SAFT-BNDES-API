@@ -28,7 +28,7 @@ public class OperacaoCreateRequest {
 
     private String subsetorBndes;
 
-    private Long numeroDoContrato;
+    private String numeroDoContrato;
 
     private String porteDoCliente;
 
@@ -108,11 +108,11 @@ public class OperacaoCreateRequest {
         this.subsetorBndes = subsetorBndes;
     }
 
-    public Long getNumeroDoContrato() {
+    public String getNumeroDoContrato() {
         return numeroDoContrato;
     }
 
-    public void setNumeroDoContrato(Long numeroDoContrato) {
+    public void setNumeroDoContrato(String numeroDoContrato) {
         this.numeroDoContrato = numeroDoContrato;
     }
 

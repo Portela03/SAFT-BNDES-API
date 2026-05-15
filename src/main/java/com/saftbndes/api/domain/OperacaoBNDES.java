@@ -46,8 +46,8 @@ public class OperacaoBNDES {
     @Column(name = "municipio_codigo")
     private Long municipioCodigo;
 
-    @Column(name = "numero_do_contrato")
-    private Long numeroDoContrato;
+    @Column(name = "numero_do_contrato", length = 40)
+    private String numeroDoContrato;
 
     @Column(name = "data_da_contratacao")
     private LocalDate dataDaContratacao;
@@ -194,11 +194,11 @@ public class OperacaoBNDES {
         this.municipioCodigo = municipioCodigo;
     }
 
-    public Long getNumeroDoContrato() {
+    public String getNumeroDoContrato() {
         return numeroDoContrato;
     }
 
-    public void setNumeroDoContrato(Long numeroDoContrato) {
+    public void setNumeroDoContrato(String numeroDoContrato) {
         this.numeroDoContrato = numeroDoContrato;
     }
 

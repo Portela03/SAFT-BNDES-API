@@ -17,10 +17,14 @@ import com.saftbndes.api.domain.OperacaoBNDES;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BndesCsvParser implements CsvParser {
+    private static final Logger log = LoggerFactory.getLogger(BndesCsvParser.class);
+
     private final CsvProperties csvProperties;
 
     public BndesCsvParser(CsvProperties csvProperties) {
@@ -30,6 +34,9 @@ public class BndesCsvParser implements CsvParser {
     @Override
     public void parse(InputStream inputStream, Consumer<OperacaoBNDES> consumer) throws IOException {
         char delimiter = csvProperties.getDelimiter().charAt(0);
+        log.info("[CSV] Iniciando parse — encoding='{}', delimiter='{}', dateFormat='{}'",
+                csvProperties.getEncoding(), delimiter, csvProperties.getDateFormat());
+
         CSVFormat format = CSVFormat.DEFAULT.builder()
                 .setDelimiter(delimiter)
                 .setHeader()
@@ -41,6 +48,7 @@ public class BndesCsvParser implements CsvParser {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, Charset.forName(csvProperties.getEncoding())));
              CSVParser parser = format.parse(reader)) {
+            log.info("[CSV] Colunas detectadas no cabeçalho: {}", parser.getHeaderNames());
             for (CSVRecord record : parser) {
                 OperacaoBNDES operacao = new OperacaoBNDES();
                 operacao.setBndesId(getLong(record, "_id"));
@@ -50,7 +58,7 @@ public class BndesCsvParser implements CsvParser {
                 operacao.setUf(getString(record, "uf"));
                 operacao.setMunicipio(getString(record, "municipio"));
                 operacao.setMunicipioCodigo(getLong(record, "municipio_codigo"));
-                operacao.setNumeroDoContrato(getLong(record, "numero_do_contrato"));
+                operacao.setNumeroDoContrato(getString(record, "numero_do_contrato"));
                 operacao.setDataDaContratacao(getLocalDate(record, "data_da_contratacao", formatter));
                 operacao.setValorContratadoReais(getBigDecimal(record, "valor_contratado_reais"));
                 operacao.setValorDesembolsadoReais(getBigDecimal(record, "valor_desembolsado_reais"));
@@ -105,7 +113,12 @@ public class BndesCsvParser implements CsvParser {
             normalized = normalized.replace(",", "");
         }
 
-        return new BigDecimal(normalized);
+        try {
+            return new BigDecimal(normalized);
+        } catch (NumberFormatException ex) {
+            log.warn("[CSV] Não foi possível converter '{}' para BigDecimal no campo '{}': {}", raw, name, ex.getMessage());
+            return null;
+        }
     }
 
     private Long getLong(CSVRecord record, String name) {
@@ -127,7 +140,12 @@ public class BndesCsvParser implements CsvParser {
         try {
             return LocalDateTime.parse(raw, formatter).toLocalDate();
         } catch (DateTimeParseException ex) {
-            return LocalDate.parse(raw);
+            try {
+                return LocalDate.parse(raw);
+            } catch (DateTimeParseException ex2) {
+                log.warn("[CSV] Não foi possível converter '{}' para data no campo '{}': {}", raw, name, ex2.getMessage());
+                return null;
+            }
         }
     }
 }

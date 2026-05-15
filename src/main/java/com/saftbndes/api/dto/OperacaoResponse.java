@@ -15,7 +15,7 @@ public record OperacaoResponse(
         String setorBndes,
         String subsetorBndes,
         String porteDoCliente,
-        Long numeroDoContrato,
+        String numeroDoContrato,
         String situacaoDoContrato
 ) {
 }

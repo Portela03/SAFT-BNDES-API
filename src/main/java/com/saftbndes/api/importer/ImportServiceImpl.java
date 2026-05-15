@@ -12,11 +12,14 @@ import com.saftbndes.api.client.CkanClient;
 import com.saftbndes.api.config.CkanProperties;
 import com.saftbndes.api.domain.OperacaoBNDES;
 import com.saftbndes.api.repository.OperacaoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ImportServiceImpl implements ImportService {
+    private static final Logger log = LoggerFactory.getLogger(ImportServiceImpl.class);
     private static final int BATCH_SIZE = 500;
 
     private final CkanClient ckanClient;
@@ -40,11 +43,14 @@ public class ImportServiceImpl implements ImportService {
         String resourceId = (resourceIdOverride == null || resourceIdOverride.isBlank())
                 ? ckanProperties.getResourceId()
                 : resourceIdOverride;
+        log.info("[IMPORT] Buscando URL de download no CKAN para resourceId='{}'", resourceId);
         String downloadUrl = ckanClient.getCsvDownloadUrl(resourceId);
+        log.info("[IMPORT] URL obtida: {}", downloadUrl);
 
         try (InputStream inputStream = ckanClient.downloadCsv(downloadUrl)) {
             return importFromCsv(inputStream);
         } catch (IOException ex) {
+            log.error("[IMPORT] Falha no download do CSV: {}", ex.getMessage(), ex);
             throw new IllegalStateException("CSV download failed", ex);
         }
     }
@@ -52,7 +58,10 @@ public class ImportServiceImpl implements ImportService {
     @Override
     @Transactional
     public ImportResult importFromCsv(InputStream inputStream) {
+        log.info("[IMPORT] Iniciando leitura do CSV...");
         Set<Long> existingIds = new HashSet<>(operacaoRepository.findAllBndesIds());
+        log.info("[IMPORT] IDs já existentes no banco: {}", existingIds.size());
+
         AtomicInteger total = new AtomicInteger();
         AtomicInteger imported = new AtomicInteger();
         AtomicInteger skipped = new AtomicInteger();
@@ -62,7 +71,11 @@ public class ImportServiceImpl implements ImportService {
 
         try {
             parser.parse(inputStream, operacao -> {
-                total.incrementAndGet();
+                int count = total.incrementAndGet();
+                if (count % 10_000 == 0) {
+                    log.info("[IMPORT] Progresso: {} registros lidos, {} importados, {} ignorados",
+                            count, imported.get(), skipped.get());
+                }
                 if (operacao.getBndesId() != null && existingIds.contains(operacao.getBndesId())) {
                     skipped.incrementAndGet();
                     return;
@@ -74,6 +87,7 @@ public class ImportServiceImpl implements ImportService {
                 }
             });
         } catch (IOException ex) {
+            log.error("[IMPORT] Erro ao fazer parse do CSV na linha ~{}: {}", total.get(), ex.getMessage(), ex);
             throw new IllegalStateException("CSV parsing failed", ex);
         }
 
@@ -81,10 +95,13 @@ public class ImportServiceImpl implements ImportService {
             saveBatch(batch, existingIds, imported);
         }
 
+        log.info("[IMPORT] Finalizado: total={}, importados={}, ignorados={}",
+                total.get(), imported.get(), skipped.get());
         return new ImportResult(total.get(), imported.get(), skipped.get());
     }
 
     private void saveBatch(List<OperacaoBNDES> batch, Set<Long> existingIds, AtomicInteger imported) {
+        log.debug("[IMPORT] Salvando lote de {} registros...", batch.size());
         operacaoRepository.saveAll(batch);
         imported.addAndGet(batch.size());
         for (OperacaoBNDES operacao : batch) {
