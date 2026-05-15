@@ -47,6 +47,70 @@ Arquivo CSV (local ou BNDES/CKAN)
 
 ---
 
+## Diagrama de Caso de Uso
+
+```mermaid
+flowchart LR
+    Usuario((Usuário))
+    CKAN((BNDES / CKAN))
+
+    subgraph SAFT-BNDES
+        UC1[Importar CSV Local]
+        UC2[Importar via CKAN]
+        UC3[Listar Operações]
+        UC4[Filtrar Operações]
+        UC5[Consultar Operação]
+        UC6[Cadastrar Operação]
+        UC7[Editar Operação]
+        UC8[Excluir Operação]
+        UC9[Visualizar Total por UF]
+        UC10[Visualizar Top Setores]
+    end
+
+    Usuario -->|upload multipart| UC1
+    Usuario -->|dispara download| UC2
+    CKAN -->|fornece CSV| UC2
+    Usuario --> UC3
+    UC3 -->|aplica parâmetros| UC4
+    Usuario --> UC5
+    Usuario --> UC6
+    Usuario --> UC7
+    Usuario --> UC8
+    Usuario --> UC9
+    Usuario --> UC10
+```
+
+---
+
+## Diagrama de Sequência — Importação de CSV
+
+```mermaid
+sequenceDiagram
+    actor Usuário
+    participant React as Frontend (React)
+    participant IC as ImportController
+    participant IS as ImportServiceImpl
+    participant CP as BndesCsvParser
+    participant OR as OperacaoRepository
+    participant DB as PostgreSQL
+
+    Usuário->>React: Seleciona arquivo CSV e clica em Importar
+    React->>IC: POST /carga (multipart/form-data)
+    IC->>IS: importar(file)
+    IS->>CP: parse(inputStream)
+    CP-->>IS: List[OperacaoBNDES]
+    IS->>IS: filtra duplicatas por bndesId
+    IS->>OR: saveAll(lote de 500)
+    OR->>DB: INSERT INTO operacoes_bndes (batch)
+    DB-->>OR: confirmação
+    OR-->>IS: operações persistidas
+    IS-->>IC: ImportResult(total, imported, skipped)
+    IC-->>React: 200 OK { total, imported, skipped }
+    React-->>Usuário: Exibe resultado da importação
+```
+
+---
+
 ## Tecnologias Utilizadas
 
 | Camada | Tecnologia | Justificativa |
